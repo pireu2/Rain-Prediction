@@ -21,7 +21,7 @@ def get_data(start_date : str, end_date : str):
         "longitude": 23.62,
         "start_date": start_date,
         "end_date": end_date,
-        "hourly": ["temperature_2m", "relative_humidity_2m", "rain", "weather_code", "surface_pressure"]
+        "hourly": ["temperature_2m", "dew_point_2m","relative_humidity_2m", "rain", "weather_code", "surface_pressure", "shortwave_radiation"]
     }
 
     response = requests.get(url, params=params)
