@@ -1,18 +1,20 @@
 import board
 from adafruit_bme280 import basic as adafruit_bme280
 import math
-b = 17.62
-c = 243.12
+from constants import BME280_ADDRESS, B_DEWPOINT, C_DEWPOINT
+
 
 def get_sensor():
     try:
         i2c = board.I2C()
-        bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, 0x76)
+        bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, BME280_ADDRESS)
     except (OSError, ValueError):
-        print('BME280 not detected')
+        print("BME280 not detected")
         return None
 
-    gamma = (b * bme280.temperature /(c + bme280.temperature)) + math.log(bme280.humidity / 100.0)
-    dewpoint = (c * gamma) / (b - gamma)
+    gamma = (
+        B_DEWPOINT * bme280.temperature / (C_DEWPOINT + bme280.temperature)
+    ) + math.log(bme280.humidity / 100.0)
+    dewpoint = (C_DEWPOINT * gamma) / (B_DEWPOINT - gamma)
     bme280.dewpoint = dewpoint
     return bme280

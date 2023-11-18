@@ -2,5 +2,4 @@ adafruit-circuitpython-charlcd
 adafruit-circuitpython-tsl2561
 adafruit-circuitpython-bme280
 requests
-numpy
-pandas
+
