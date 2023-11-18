@@ -1,7 +1,7 @@
-dasdasda### Rain Prediction Instrument
+### Rain Prediction Instrument
 
 ## Setup
 ```shell script
-pip install -r requirements
+pip install -r requirements.txt
 pip install -e .
 ```

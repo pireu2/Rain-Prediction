@@ -1,4 +1,4 @@
-import lcd
+from sensors import lcd
 import unittest
 
 

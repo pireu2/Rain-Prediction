@@ -1,14 +1,14 @@
 import board
 from adafruit_bme280 import basic as adafruit_bme280
 import math
-from constants import BME280_ADDRESS, B_DEWPOINT, C_DEWPOINT
+from constants.constants import BME280_ADDRESS, B_DEWPOINT, C_DEWPOINT
 
 
 def get_sensor():
     try:
         i2c = board.I2C()
         bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, BME280_ADDRESS)
-    except (OSError, ValueError):
+    except (OSError, ValueError, AttributeError):
         print("BME280 not detected")
         return None
 

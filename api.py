@@ -1,8 +1,8 @@
 import requests
-import json
 import csv
 import re
-from constants import API_OUTPUT_FILE, MODIFIED_OUTPUT_FILE
+from datetime import datetime
+from constants.constants import API_OUTPUT_FILE, MODIFIED_OUTPUT_FILE
 
 
 def is_yyyymmdd_format(date: str):
@@ -54,12 +54,14 @@ def shift():
         reader = csv.DictReader(file)
         data = list(reader)
 
+    data = sorted(data, key = lambda x:datetime.strptime(x["time"], "%Y-%m-%dT%H:%M"))
+
     for i in range(len(data)):
-        data[i]["precipitation_1h"] = data[i-1]["precipitation"] if i >= 0 else 0
-        data[i]["precipitation_6h"] = data[i-6]["precipitation"] if i > 5 else 0
-        data[i]["precipitation_12h"] = data[i-12]["precipitation"] if i > 11 else 0
-        data[i]["precipitation_24h"] = data[i-24]["precipitation"] if i > 23 else 0
-    
+        data[i]["precipitation_1h"] = data[i-1]["precipitation"] if i >= 0 else 0.0
+        data[i]["precipitation_6h"] = data[i-6]["precipitation"] if i > 5 else 0.0
+        data[i]["precipitation_12h"] = data[i-12]["precipitation"] if i > 11 else 0.0
+        data[i]["precipitation_24h"] = data[i-24]["precipitation"] if i > 23 else 0.0
+
     fields = data[0].keys()
 
     with open(MODIFIED_OUTPUT_FILE, "w") as file:
@@ -69,10 +71,10 @@ def shift():
 
 
 def main():
-    data = get_data("2013-11-01", "2023-11-01")
-    if data == "Error":
-        return
-    output_csv(data)
+    # data = get_data("2013-11-01", "2023-11-01")
+    # if data == "Error":
+    #     return
+    # output_csv(data)
     shift()
 
 
