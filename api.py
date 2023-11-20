@@ -80,10 +80,10 @@ def shift():
 
 
 def main():
-    # data = get_data("2013-11-01", "2023-11-01")
-    # if data == "Error":
-    #     return
-    # output_csv(data)
+    data = get_data("2003-11-01", "2023-11-01")
+    if data == "Error":
+        return
+    output_csv(data)
     shift()
 
 

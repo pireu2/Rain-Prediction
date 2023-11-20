@@ -3,3 +3,5 @@ adafruit-circuitpython-tsl2561
 adafruit-circuitpython-bme280
 requests
 scikit-learn
+tensorflow
+numpy

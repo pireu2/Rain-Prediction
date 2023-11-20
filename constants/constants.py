@@ -8,8 +8,10 @@ TSL2561_ADDRESS = 0x39
 API_OUTPUT_FILE = str(os.path.join("data", "data.csv"))
 MODIFIED_OUTPUT_FILE = str(os.path.join("data", "data-modified.csv"))
 
+AI_MODEL_PATH = str(os.path.join("models", ""))
+
 # constant for computing dewpoint
 B_DEWPOINT = 17.62
 C_DEWPOINT = 243.12
 
-TEST_SIZE = 0.4
+TEST_SIZE = 0.2
