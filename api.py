@@ -49,18 +49,27 @@ def output_csv(data):
         for row in zip(*data["hourly"].values()):
             writer.writerow(dict(zip(data["hourly"].keys(), row)))
 
+
 def shift():
     with open(API_OUTPUT_FILE, "r") as file:
         reader = csv.DictReader(file)
         data = list(reader)
 
-    data = sorted(data, key = lambda x:datetime.strptime(x["time"], "%Y-%m-%dT%H:%M"))
+    data = sorted(data, key=lambda x: datetime.strptime(x["time"], "%Y-%m-%dT%H:%M"))
 
     for i in range(len(data)):
-        data[i]["precipitation_1h"] = data[i+1]["precipitation"] if i < len(data) - 1 else 0.0
-        data[i]["precipitation_6h"] = data[i+6]["precipitation"] if i < len(data) - 6  else 0.0
-        data[i]["precipitation_12h"] = data[i+12]["precipitation"] if i < len(data) - 12 else 0.0
-        data[i]["precipitation_24h"] = data[i+24]["precipitation"] if i < len(data) - 24 else 0.0
+        data[i]["precipitation_1h"] = (
+            data[i + 1]["precipitation"] if i < len(data) - 1 else 0.0
+        )
+        data[i]["precipitation_6h"] = (
+            data[i + 6]["precipitation"] if i < len(data) - 6 else 0.0
+        )
+        data[i]["precipitation_12h"] = (
+            data[i + 12]["precipitation"] if i < len(data) - 12 else 0.0
+        )
+        data[i]["precipitation_24h"] = (
+            data[i + 24]["precipitation"] if i < len(data) - 24 else 0.0
+        )
 
     fields = data[0].keys()
 
