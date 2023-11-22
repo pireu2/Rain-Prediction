@@ -6,7 +6,7 @@ TSL2561_ADDRESS = 0x39
 
 # output csv file
 API_OUTPUT_FILE = str(os.path.join("data", "data.csv"))
-MODIFIED_OUTPUT_FILE = str(os.path.join("data", "data-modified.csv"))
+NORMALIZED_DATA = str(os.path.join("data", "data-modified.csv"))
 
 AI_MODEL_PATH = str(os.path.join("models", ""))
 

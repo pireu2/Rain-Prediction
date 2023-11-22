@@ -1,57 +1,34 @@
 import csv
 import tensorflow as tf
 import numpy as np
+from util.data import prepare_data, read_data
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-from sklearn.preprocessing import StandardScaler
-
-from constants.constants import MODIFIED_OUTPUT_FILE, TEST_SIZE, AI_MODEL_PATH
+from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH
 
 
-def prepare_data(data, feature_indices, target_index):
-    x = np.array([[float(row[i]) for i in feature_indices] for row in data])
-    y = np.array([float(row[target_index]) for row in data])
-    return x,y
-
-def create_model(input_dimension):
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(128, input_dim=input_dimension, activation="relu"),
-        tf.keras.layers.Dense(64, activation="relu"),
-        tf.keras.layers.Dense(64, activation="relu"),
-        tf.keras.layers.Dense(32, activation="relu"),
-        tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(1, activation="sigmoid")
-    ])
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        loss=custom_loss,
-        metrics=["mean_squared_error"]
-    )
-    return model
-
-def custom_loss(y_true, y_pred):
-    y_true_original = tf.keras.backend.exp(y_true) - 1
-    y_pred_original = tf.keras.backend.exp(y_pred) - 1
-
-    reward_component = tf.keras.backend.mean(tf.keras.backend.square(y_true_original - y_pred_original), axis=-1)
-    penalty_component = tf.keras.backend.mean(tf.keras.backend.square(tf.keras.backend.minimum(y_true_original, 0)), axis = -1)
-
-    alpha = 0.8
-    combined_loss = alpha * reward_component + (1-alpha) * penalty_component
-
-    return combined_loss
-
-def main():
-    with open(MODIFIED_OUTPUT_FILE, "r") as file:
-        reader = csv.DictReader(file)
-        header = list(next(reader))
-        data = [list(row.values()) for row in reader]
-
-
-    train_data, test_data = train_test_split(data, test_size=TEST_SIZE)
-
-    feature_indices = [
-            header.index(feature)
+class RainPrediction:
+    def __init__(self, data, header):
+        self.models = {}
+        self.data = data
+        self.header = header
+        self.train_data, self.test_data = train_test_split(
+            self.data, test_size=TEST_SIZE
+        )
+        self.class_names = [
+            "No Rain",
+            "Light Rain",
+            "Moderate Rain",
+            "Heavy Rain",
+            "Violent Rain",
+        ]
+        self.target_variables = [
+            "precipitation_1h",
+            "precipitation_6h",
+            "precipitation_12h",
+            "precipitation_24h",
+        ]
+        self.feature_indices = [
+            self.header.index(feature)
             for feature in [
                 "temperature_2m",
                 "dew_point_2m",
@@ -60,34 +37,61 @@ def main():
                 "shortwave_radiation",
             ]
         ]
-    target_variables = [
-        "precipitation_1h",
-        "precipitation_6h",
-        "precipitation_12h",
-        "precipitation_24h",
-    ]
 
-    for target_variable in target_variables:
-        target_index = header.index(target_variable)
+    def create_model(self, target_variable: str):
+        model = tf.keras.models.Sequential(
+            [
+                tf.keras.Input(shape=(len(self.feature_indices),)),
+                tf.keras.layers.Dense(16, activation="relu"),
+                tf.keras.layers.Dense(32, activation="relu"),
+                tf.keras.layers.Dense(64, activation="relu"),
+                tf.keras.layers.Dense(128, activation="relu"),
+                tf.keras.layers.Dropout(0.4),
+                tf.keras.layers.Dense(5, activation="softmax"),
+            ]
+        )
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        self.models[target_variable] = model
+        return model
 
-        x_train, y_train = prepare_data(train_data, feature_indices, target_index)
-        x_test, y_test = prepare_data(test_data, feature_indices, target_index)
+    def save_model(self, target_variable: str):
+        model = self.models[target_variable]
+        model.save(AI_MODEL_PATH + str(target_variable), save_format="tf")
 
-        y_train_transformed = np.log1p(y_train)
-        y_test_transformed = np.log1p(y_test)
+    def train_model(self, target_variable: str):
+        model = self.models[target_variable]
+        index = self.header.index(target_variable)
+        x_train, y_train = prepare_data(self.train_data, self.feature_indices, index)
+        x_test, y_test = prepare_data(self.test_data, self.feature_indices, index)
 
-        model = create_model(len(feature_indices))
-        model.fit(x_train, y_train_transformed, epochs=5)
-        model.evaluate(x_test, y_test_transformed, verbose=2)
+        model.fit(x_train, y_train, epochs=3)
+        test_loss, tess_accuracy = model.evaluate(x_test, y_test)
+        print(f"Accuracy: {tess_accuracy}")
 
-        predictions_transformed = model.predict(x_test)
-        predictions = np.expm1(predictions_transformed)
-        mse = mean_squared_error(y_test, predictions)
-        mae = mean_absolute_error(y_test, predictions)
-        print(f'Mean Squared Error: {mse}')
-        print(f'Mean Absolute Error: {mae}')
+    def create_and_train_all_models(self):
+        for target_variable in self.target_variables:
+            self.create_model(target_variable)
+            self.train_model(target_variable)
+            self.save_model(target_variable)
 
-        model.save(AI_MODEL_PATH + str(target_variable), save_format='tf')
+    def make_prediction(self, target_variable: str, data):
+        print("Model prediction")
+        if target_variable not in self.models:
+            print("Error")
+            return
+        prediction = self.models[target_variable].predict(data)
+        print(f"Prediction=> {self.class_names[np.argmax(prediction)]}")
 
-if __name__ == '__main__':
+
+def main():
+    data, header = read_data(NORMALIZED_DATA)
+    rain_prediction = RainPrediction(data, header)
+    rain_prediction.create_and_train_all_models()
+
+
+if __name__ == "__main__":
     main()
