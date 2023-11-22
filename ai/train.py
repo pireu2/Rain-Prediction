@@ -1,9 +1,8 @@
-import csv
 import tensorflow as tf
 import numpy as np
 from util.data import prepare_data, read_data
 from sklearn.model_selection import train_test_split
-from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH
+from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH, EPOCHS_NUMBER
 
 
 class RainPrediction:
@@ -68,7 +67,7 @@ class RainPrediction:
         x_train, y_train = prepare_data(self.train_data, self.feature_indices, index)
         x_test, y_test = prepare_data(self.test_data, self.feature_indices, index)
 
-        model.fit(x_train, y_train, epochs=3)
+        model.fit(x_train, y_train, epochs=1)
         test_loss, tess_accuracy = model.evaluate(x_test, y_test)
         print(f"Accuracy: {tess_accuracy}")
 
@@ -76,6 +75,9 @@ class RainPrediction:
         for target_variable in self.target_variables:
             self.create_model(target_variable)
             self.train_model(target_variable)
+            self.save_model(target_variable)
+    def save_all_models(self):
+        for target_variable in self.target_variables:
             self.save_model(target_variable)
 
     def make_prediction(self, target_variable: str, data):
@@ -91,6 +93,7 @@ def main():
     data, header = read_data(NORMALIZED_DATA)
     rain_prediction = RainPrediction(data, header)
     rain_prediction.create_and_train_all_models()
+    rain_prediction.save_all_models()
 
 
 if __name__ == "__main__":

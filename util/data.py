@@ -44,24 +44,28 @@ def normalize_data(input_path: str, output_path: str) -> bool:
 
     data = sorted(data, key=lambda x: datetime.strptime(x["time"], "%Y-%m-%dT%H:%M"))
 
-    for i in range(len(data)):
-        data[i]["precipitation_1h"] = (
-            to_label(data[i + 1]["precipitation"]) if i < len(data) - 1 else 0.0
-        )
-        data[i]["precipitation_6h"] = (
-            to_label(data[i + 6]["precipitation"]) if i < len(data) - 6 else 0.0
-        )
-        data[i]["precipitation_12h"] = (
-            to_label(data[i + 12]["precipitation"]) if i < len(data) - 12 else 0.0
-        )
-        data[i]["precipitation_24h"] = (
-            to_label(data[i + 24]["precipitation"]) if i < len(data) - 24 else 0.0
-        )
-        data[i]["temperature_2m"] = float(data[i]["temperature_2m"]) / 40
-        data[i]["dew_point_2m"] = float(data[i]["dew_point_2m"]) / 30
-        data[i]["relative_humidity_2m"] = float(data[i]["relative_humidity_2m"]) / 100
-        data[i]["surface_pressure"] = float(data[i]["surface_pressure"]) / 1010
-        data[i]["shortwave_radiation"] = float(data[i]["shortwave_radiation"]) / 1000
+    try:
+        for i in range(len(data)):
+            data[i]["precipitation_1h"] = (
+                to_label(data[i + 1]["precipitation"]) if i < len(data) - 1 else 0.0
+            )
+            data[i]["precipitation_6h"] = (
+                to_label(data[i + 6]["precipitation"]) if i < len(data) - 6 else 0.0
+            )
+            data[i]["precipitation_12h"] = (
+                to_label(data[i + 12]["precipitation"]) if i < len(data) - 12 else 0.0
+            )
+            data[i]["precipitation_24h"] = (
+                to_label(data[i + 24]["precipitation"]) if i < len(data) - 24 else 0.0
+            )
+            data[i]["temperature_2m"] = float(data[i]["temperature_2m"]) / 40
+            data[i]["dew_point_2m"] = float(data[i]["dew_point_2m"]) / 30
+            data[i]["relative_humidity_2m"] = float(data[i]["relative_humidity_2m"]) / 100
+            data[i]["surface_pressure"] = float(data[i]["surface_pressure"]) / 1010
+            data[i]["shortwave_radiation"] = float(data[i]["shortwave_radiation"]) / 1000
+    except (ValueError, IndexError):
+        print("Data not valid")
+        return False
 
     fields = data[0].keys()
 
@@ -73,7 +77,17 @@ def normalize_data(input_path: str, output_path: str) -> bool:
     except FileNotFoundError:
         return False
     return True
-
+def normalize_sensors(data)-> bool:
+    try:
+        data["temperature"] = float(data["temperature"]) / 40
+        data["dewpoint"] = float(data["dewpoint"]) / 30
+        data["humidity"] = float(data["humidity"]) / 100
+        data["pressure"] = float(data["pressure"]) / 1010
+        data["luminosity"] = float(data["luminosity"]) / 1000
+        return True
+    except (ValueError, IndexError):
+        print("Data not valid")
+        return False
 
 def main():
     if not normalize_data(API_OUTPUT_FILE, NORMALIZED_DATA):
