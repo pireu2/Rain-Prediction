@@ -1,11 +1,11 @@
-### Rain Prediction Instrument
+# Rain Prediction Instrument
 
 ## API
 The api used for gathering the data for the neural network is [Open Meteo](https://open-meteo.com/).
 </br>
 Formula used for calculated dewpoint using temperature, humidity and pressure [link](https://en.wikipedia.org/wiki/Dew_point#Calculating_the_dew_point).
 ## Prerequisites
-- Python 3.11 </br>
+- Python 3.11 
 - Raspberrypi 4
 - BME280 Temperature, Humidity and Pressure Sensor
 - TSL2561 Light Intensity Sensor
@@ -28,4 +28,8 @@ python util/data.py
 ### Training and saving the models
 ```shell script
 python ai/train.py
+```
+### Testing sensors
+```shell script
+pyhon tests/test.py
 ```

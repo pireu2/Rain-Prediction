@@ -14,6 +14,6 @@ AI_MODEL_PATH = str(os.path.join("models", ""))
 B_DEWPOINT = 17.62
 C_DEWPOINT = 243.12
 
-#constants for AI training
+# constants for AI training
 TEST_SIZE = 0.2
 EPOCHS_NUMBER = 10

@@ -76,6 +76,7 @@ class RainPrediction:
             self.create_model(target_variable)
             self.train_model(target_variable)
             self.save_model(target_variable)
+
     def save_all_models(self):
         for target_variable in self.target_variables:
             self.save_model(target_variable)

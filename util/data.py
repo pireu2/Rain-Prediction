@@ -60,9 +60,13 @@ def normalize_data(input_path: str, output_path: str) -> bool:
             )
             data[i]["temperature_2m"] = float(data[i]["temperature_2m"]) / 40
             data[i]["dew_point_2m"] = float(data[i]["dew_point_2m"]) / 30
-            data[i]["relative_humidity_2m"] = float(data[i]["relative_humidity_2m"]) / 100
+            data[i]["relative_humidity_2m"] = (
+                float(data[i]["relative_humidity_2m"]) / 100
+            )
             data[i]["surface_pressure"] = float(data[i]["surface_pressure"]) / 1010
-            data[i]["shortwave_radiation"] = float(data[i]["shortwave_radiation"]) / 1000
+            data[i]["shortwave_radiation"] = (
+                float(data[i]["shortwave_radiation"]) / 1000
+            )
     except (ValueError, IndexError):
         print("Data not valid")
         return False
@@ -77,7 +81,9 @@ def normalize_data(input_path: str, output_path: str) -> bool:
     except FileNotFoundError:
         return False
     return True
-def normalize_sensors(data)-> bool:
+
+
+def normalize_sensors(data) -> bool:
     try:
         data["temperature"] = float(data["temperature"]) / 40
         data["dewpoint"] = float(data["dewpoint"]) / 30
@@ -88,6 +94,7 @@ def normalize_sensors(data)-> bool:
     except (ValueError, IndexError):
         print("Data not valid")
         return False
+
 
 def main():
     if not normalize_data(API_OUTPUT_FILE, NORMALIZED_DATA):
