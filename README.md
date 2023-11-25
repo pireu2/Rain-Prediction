@@ -1,4 +1,4 @@
-# Rain Prediction Instrument
+# Rain Prediction Raspberrypi 
 
 ## API
 The api used for gathering the data for the neural network is [Open Meteo](https://open-meteo.com/).
