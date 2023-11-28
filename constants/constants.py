@@ -17,3 +17,10 @@ C_DEWPOINT = 243.12
 # constants for AI training
 TEST_SIZE = 0.2
 EPOCHS_NUMBER = 10
+
+# normalizing constants
+TEMP_N = 40
+DEWPOINT_N = 30
+HUMIDITY_N = 100
+PRESSURE_N = 1010
+LUMINOSITY_N = 1000

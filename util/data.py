@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 from datetime import datetime
-from constants.constants import NORMALIZED_DATA, API_OUTPUT_FILE
+from constants.constants import NORMALIZED_DATA, API_OUTPUT_FILE, TEMP_N, PRESSURE_N, DEWPOINT_N, HUMIDITY_N, LUMINOSITY_N
 
 
 def read_data(path: str) -> ([], []):
@@ -58,14 +58,14 @@ def normalize_data(input_path: str, output_path: str) -> bool:
             data[i]["precipitation_24h"] = (
                 to_label(data[i + 24]["precipitation"]) if i < len(data) - 24 else 0.0
             )
-            data[i]["temperature_2m"] = float(data[i]["temperature_2m"]) / 40
-            data[i]["dew_point_2m"] = float(data[i]["dew_point_2m"]) / 30
+            data[i]["temperature_2m"] = float(data[i]["temperature_2m"]) / TEMP_N
+            data[i]["dew_point_2m"] = float(data[i]["dew_point_2m"]) / DEWPOINT_N
             data[i]["relative_humidity_2m"] = (
-                float(data[i]["relative_humidity_2m"]) / 100
+                float(data[i]["relative_humidity_2m"]) / HUMIDITY_N
             )
-            data[i]["surface_pressure"] = float(data[i]["surface_pressure"]) / 1010
+            data[i]["surface_pressure"] = float(data[i]["surface_pressure"]) / PRESSURE_N
             data[i]["shortwave_radiation"] = (
-                float(data[i]["shortwave_radiation"]) / 1000
+                float(data[i]["shortwave_radiation"]) / LUMINOSITY_N
             )
     except (ValueError, IndexError):
         print("Data not valid")
@@ -85,10 +85,10 @@ def normalize_data(input_path: str, output_path: str) -> bool:
 
 def normalize_sensors(data):
     try:
-        normalized = {"temperature_2m": float(data["temperature"]) / 40, "dew_point_2m": float(data["dewpoint"]) / 30,
-                      "relative_humidity_2m": float(data["humidity"]) / 100,
-                      "surface_pressure": float(data["pressure"]) / 1010,
-                      "shortwave_radiation": float(data["luminosity"]) / 1000}
+        normalized = {"temperature_2m": float(data["temperature"]) / TEMP_N, "dew_point_2m": float(data["dewpoint"]) / DEWPOINT_N,
+                      "relative_humidity_2m": float(data["humidity"]) / HUMIDITY_N,
+                      "surface_pressure": float(data["pressure"]) / PRESSURE_N,
+                      "shortwave_radiation": float(data["luminosity"]) / LUMINOSITY_N}
         return normalized
     except (ValueError, IndexError):
         print("Data not valid")
