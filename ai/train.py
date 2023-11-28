@@ -6,13 +6,24 @@ from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH, EPOCH
 
 
 class RainPrediction:
-    def __init__(self, data, header):
+    def __init__(self, data=None, header=None):
         self.models = {}
         self.data = data
         self.header = header
-        self.train_data, self.test_data = train_test_split(
-            self.data, test_size=TEST_SIZE
-        )
+        if self.data and self.header:
+            self.train_data, self.test_data = train_test_split(
+                self.data, test_size=TEST_SIZE
+            )
+            self.feature_indices = [
+                self.header.index(feature)
+                for feature in [
+                    "temperature_2m",
+                    "dew_point_2m",
+                    "relative_humidity_2m",
+                    "surface_pressure",
+                    "shortwave_radiation",
+                ]
+            ]
         self.class_names = [
             "No Rain",
             "Light Rain",
@@ -25,16 +36,6 @@ class RainPrediction:
             "precipitation_6h",
             "precipitation_12h",
             "precipitation_24h",
-        ]
-        self.feature_indices = [
-            self.header.index(feature)
-            for feature in [
-                "temperature_2m",
-                "dew_point_2m",
-                "relative_humidity_2m",
-                "surface_pressure",
-                "shortwave_radiation",
-            ]
         ]
 
     def create_model(self, target_variable: str):
@@ -81,13 +82,20 @@ class RainPrediction:
         for target_variable in self.target_variables:
             self.save_model(target_variable)
 
-    def make_prediction(self, target_variable: str, data):
+    def load_all_models(self):
+        for target_variable in self.target_variables:
+            model = tf.keras.models.load_model(AI_MODEL_PATH + target_variable)
+            self.models[target_variable] = model
+
+    def make_prediction(self, target_variable: str, data) -> str:
         print("Model prediction")
         if target_variable not in self.models:
             print("Error")
             return
-        prediction = self.models[target_variable].predict(data)
-        print(f"Prediction=> {self.class_names[np.argmax(prediction)]}")
+        data_array = np.array(list(data.values())).reshape(1, -1)
+        prediction = self.models[target_variable].predict(data_array)
+        predicted_class = np.argmax(prediction)
+        return self.class_names[predicted_class]
 
 
 def main():
