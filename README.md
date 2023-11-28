@@ -13,6 +13,7 @@ Formula used for calculated dewpoint using temperature, humidity and pressure [l
 ## Setup
 ### Installing dependencies
 ```shell script
+git clone https://github.com/pireu2/Rain-Prediction.git
 pip install -r requirements.txt
 pip install -e .
 ```
