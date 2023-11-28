@@ -1,8 +1,7 @@
 import time
-import numpy as np
 from sensors import bme280, tsl2561, lcd
-from util.data import normalize_sensors
 from ai.train import RainPrediction
+from util.data import normalize_sensors
 
 
 def main():
@@ -26,7 +25,7 @@ def main():
             lcd_display.clear()
             lcd_display.color = (255, 0, 0)
             prediction = rain_prediction.make_prediction(
-                "precipitation_1h", data
+                "precipitation_1h", normalize_sensors(data)
             )
             lcd_display.message = f'Prediction 1h:\n{prediction}'
             time.sleep(2)
@@ -35,7 +34,7 @@ def main():
             lcd_display.clear()
             lcd_display.color = (255, 0, 0)
             prediction = rain_prediction.make_prediction(
-                "precipitation_6h", data
+                "precipitation_6h", normalize_sensors(data)
             )
             lcd_display.message = f'Prediction 6h:\n{prediction}'
             time.sleep(2)
@@ -44,7 +43,7 @@ def main():
             lcd_display.clear()
             lcd_display.color = (255, 0, 0)
             prediction = rain_prediction.make_prediction(
-                "precipitation_12h", data
+                "precipitation_12h", normalize_sensors(data)
             )
             lcd_display.message = f'Prediction 12h:\n{prediction}'
             time.sleep(2)
@@ -53,7 +52,7 @@ def main():
             lcd_display.clear()
             lcd_display.color = (255, 0, 0)
             prediction = rain_prediction.make_prediction(
-                "precipitation_24h", data
+                "precipitation_24h", normalize_sensors(data)
             )
             lcd_display.message = f'Prediction 24h:\n{prediction}'
             time.sleep(2)

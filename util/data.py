@@ -85,13 +85,11 @@ def normalize_data(input_path: str, output_path: str) -> bool:
 
 def normalize_sensors(data):
     try:
-        normalized = {}
-        normalized["temperature_2m"] = float(data["temperature"]) / 40
-        normalized["dew_point_2m"] = float(data["dewpoint"]) / 30
-        normalized["relative_humidity_2m"] = float(data["humidity"]) / 100
-        normalized["surface_pressure"] = float(data["pressure"]) / 1010
-        normalized["shortwave_radiation"] = float(data["luminosity"]) / 1000
-        return list(normalized.values())
+        normalized = {"temperature_2m": float(data["temperature"]) / 40, "dew_point_2m": float(data["dewpoint"]) / 30,
+                      "relative_humidity_2m": float(data["humidity"]) / 100,
+                      "surface_pressure": float(data["pressure"]) / 1010,
+                      "shortwave_radiation": float(data["luminosity"]) / 1000}
+        return normalized
     except (ValueError, IndexError):
         print("Data not valid")
         return False
