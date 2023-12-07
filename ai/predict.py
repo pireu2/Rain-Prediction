@@ -12,13 +12,13 @@ def main():
     lcd_display.color = (0, 0, 255)
     while True:
         bme = bme280.get_sensor()
-        # tsl = tsl2561.get_sensor()
+        tsl = tsl2561.get_sensor()
         data = {
             "temperature": bme.temperature,
             "pressure": bme.pressure,
             "humidity": bme.humidity,
             "dewpoint": bme.dewpoint,
-            "luminosity": 500,  # tsl.broadband
+            "luminosity": tsl.broadband,
         }
 
         if lcd_display.up_button:

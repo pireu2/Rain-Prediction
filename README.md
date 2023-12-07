@@ -1,5 +1,42 @@
 # Rain Prediction Raspberrypi 
-
+small summary of the project
+## Motivation
+This project was created for the Electronic Measurement Systems course at the Faculty of Computer Science at Technical University of Cluj-Napoca. The goal of the project was to create a neural network that predicts if it will rain in the next 1, 6, 12 or 24 hours. The neural network was trained using data from the [Open Meteo](https://open-meteo.com/) api and the data from the sensors. The sensors used for this project are [BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) and [TSL2561](https://ams.com/tsl2561). The neural network was trained using the [Keras](https://keras.io/) library. The neural network was trained on a local computer and the models were saved. The models were then loaded in memory on the Raspberrypi and used for predicting the weather. The predictions were displayed on a 1602 LCD Hat with buttons. The LED on the LCD Hat turns red when the models are being loaded in memory and green when the models are loaded in memory. The LED blinks red when the data is being gathered from the sensors. The LED blinks green when the prediction is being made.
+## Table of contents
+- [Project Structure](#project-structure)
+- [API](#api)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+    - [Installing dependencies](#installing-dependencies)
+    - [Downloading data from api](#downloading-data-from-api)
+    - [Normalizing data](#normalizing-data)
+    - [Training and saving the models](#training-and-saving-the-models)
+- [Running](#running)
+    - [Testing sensors](#testing-sensors)
+    - [Predicting Raining](#predicting-raining)
+## Project Structure
+- `ai` - package for all AI related functions and classes
+    - `predict.py` - main function used for reading data from sensors and predicting 
+    - `train.py` - AI network creation and training
+- `constants` - package for all constants
+    - `constants.py` - all constants used for this project
+- `data` - folder used for storing data
+   - `data.csv` - data from the api
+   - `data-modified.csv` - data after categorizing and normalizing
+- `models` - folder for storing all trained models
+- `sensors` - package for all sensor related functions
+   - `bme280.py` - functions for getting and calculating the dewpoint for the BME280 sensor
+   - `tsl2561.py` - functions for getting the TSL2561 sensor
+   - `lcd.py` - functions for getting the LCD
+- `tests` - package for all the tests
+   - `test.py` - runs all tests
+   - `test_lcd.py` - test for the LCD
+   - `test_sensors.py` - tests for all the sensors
+- `util` - package for all utility functions
+   - `api.py` - functions for requesting data from the api and writing it in memory
+   - `data.py` - functions for normalizing the api data and the data from the sensors
+- `requirements.txt` - list of all python packages required for running this project
+- `setup.py` - setup routine for installing local packages
 ## API
 The api used for gathering the data for the neural network is [Open Meteo](https://open-meteo.com/).
 </br>
@@ -48,26 +85,3 @@ For predictions, press the buttons on the LCD Hat:
 - `12h prediction`: down button
 - `24h prediction`: left button
 - `exit`: select button
-## Project Structure
-- `ai` - package for all AI related functions and classes
-    - `predict.py` - main function used for reading data from sensors and predicting 
-    - `train.py` - AI network creation and training
-- `constants` - package for all constants
-    - `constants.py` - all constants used for this project
-- `data` - folder used for storing data
-   - `data.csv` - data from the api
-   - `data-modified.csv` - data after categorizing and normalizing
-- `models` - folder for storing all trained models
-- `sensors` - package for all sensor related functions
-   - `bme280.py` - functions for getting and calculating the dewpoint for the BME280 sensor
-   - `tsl2561.py` - functions for getting the TSL2561 sensor
-   - `lcd.py` - functions for getting the LCD
-- `tests` - package for all the tests
-   - `test.py` - runs all tests
-   - `test_lcd.py` - test for the LCD
-   - `test_sensors.py` - tests for all the sensors
-- `util` - package for all utility functions
-   - `api.py` - functions for requesting data from the api and writing it in memory
-   - `data.py` - functions for normalizing the api data and the data from the sensors
-- `requirements.txt` - list of all python packages required for running this project
-- `setup.py` - setup routine for installing local packages
