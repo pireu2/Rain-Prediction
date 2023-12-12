@@ -85,3 +85,18 @@ For predictions, press the buttons on the LCD Hat:
 - `12h prediction`: down button
 - `24h prediction`: left button
 - `exit`: select button
+
+## Light Intensity
+| Illuminance          | Example                                                 |
+|----------------------|---------------------------------------------------------|
+| 0.002 lux            | Moonless clear night sky                                |
+| 0.2 lux              | Design minimum for emergency lighting (AS2293).         |
+| 0.27 - 1 lux         | Full moon on a clear night                              |
+| 3.4 lux              | Dark limit of civil twilight under a clear sky          |
+| 50 lux               | Family living room                                      |
+| 80 lux               | Hallway/toilet                                          |
+| 100 lux              | Very dark overcast day                                  |
+| 300 - 500 lux        | Sunrise or sunset on a clear day. Well-lit office area. |
+| 1,000 lux            | Overcast day; typical TV studio lighting                |
+| 10,000 - 25,000 lux  | Full daylight (not direct sun)                          |
+| 32,000 - 130,000 lux | Direct sunlight                                         |

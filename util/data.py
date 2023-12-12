@@ -88,7 +88,7 @@ def normalize_sensors(data):
         normalized = {"temperature_2m": float(data["temperature"]) / TEMP_N, "dew_point_2m": float(data["dewpoint"]) / DEWPOINT_N,
                       "relative_humidity_2m": float(data["humidity"]) / HUMIDITY_N,
                       "surface_pressure": float(data["pressure"]) / PRESSURE_N,
-                      "shortwave_radiation": float(data["luminosity"]) / LUMINOSITY_N}
+                      "shortwave_radiation": float(data["luminosity"]) / LUMINOSITY_N / 4000}
         return normalized
     except (ValueError, IndexError):
         print("Data not valid")
