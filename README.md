@@ -1,5 +1,4 @@
-# Rain Prediction Raspberrypi 
-small summary of the project
+# Rain Prediction Raspberrypi
 ## Motivation
 This project was created for the Electronic Measurement Systems course at the Faculty of Computer Science at Technical University of Cluj-Napoca. The goal of the project was to create a neural network that predicts if it will rain in the next 1, 6, 12 or 24 hours. The neural network was trained using data from the [Open Meteo](https://open-meteo.com/) api and the data from the sensors. The sensors used for this project are [BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) and [TSL2561](https://ams.com/tsl2561). The neural network was trained using the [Keras](https://keras.io/) library. The neural network was trained on a local computer and the models were saved. The models were then loaded in memory on the Raspberrypi and used for predicting the weather. The predictions were displayed on a 1602 LCD Hat with buttons. The LED on the LCD Hat turns red when the models are being loaded in memory and green when the models are loaded in memory. The LED blinks red when the data is being gathered from the sensors. The LED blinks green when the prediction is being made.
 ## Table of contents

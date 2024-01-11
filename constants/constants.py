@@ -16,7 +16,7 @@ C_DEWPOINT = 243.12
 
 # constants for AI training
 TEST_SIZE = 0.2
-EPOCHS_NUMBER = 10
+EPOCHS_NUMBER = 40
 
 # normalizing constants
 TEMP_N = 40

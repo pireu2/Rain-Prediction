@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH, EPOCHS_NUMBER
 
 
+# noinspection PyUnresolvedReferences
 class RainPrediction:
     def __init__(self, data=None, header=None):
         self.models = {}
@@ -42,10 +43,11 @@ class RainPrediction:
         model = tf.keras.models.Sequential(
             [
                 tf.keras.Input(shape=(len(self.feature_indices),)),
-                tf.keras.layers.Dense(16, activation="relu"),
-                tf.keras.layers.Dense(32, activation="relu"),
-                tf.keras.layers.Dense(64, activation="relu"),
-                tf.keras.layers.Dense(128, activation="relu"),
+                tf.keras.layers.Dense(16, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+                tf.keras.layers.Dense(32, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+                tf.keras.layers.Dense(64, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+                tf.keras.layers.Dense(64, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+                tf.keras.layers.Dense(32, activation="relu", kernel_regularizer=tf.keras.regularizers.l2(0.01)),
                 tf.keras.layers.Dropout(0.4),
                 tf.keras.layers.Dense(5, activation="softmax"),
             ]
@@ -68,7 +70,7 @@ class RainPrediction:
         x_train, y_train = prepare_data(self.train_data, self.feature_indices, index)
         x_test, y_test = prepare_data(self.test_data, self.feature_indices, index)
 
-        model.fit(x_train, y_train, epochs=1)
+        model.fit(x_train, y_train, epochs=EPOCHS_NUMBER)
         test_loss, tess_accuracy = model.evaluate(x_test, y_test)
         print(f"Accuracy: {tess_accuracy}")
 
@@ -91,7 +93,7 @@ class RainPrediction:
         print("Model prediction")
         if target_variable not in self.models:
             print("Error")
-            return
+            return "Error"
         data_array = np.array(list(data.values())).reshape(1, -1)
         prediction = self.models[target_variable].predict(data_array)
         predicted_class = np.argmax(prediction)
