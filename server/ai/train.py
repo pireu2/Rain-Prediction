@@ -3,7 +3,7 @@ import numpy as np
 import shutil
 import os
 from random import shuffle
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model # type: ignore
 from util.data import prepare_data, read_data
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
