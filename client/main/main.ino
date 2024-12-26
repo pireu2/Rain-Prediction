@@ -28,16 +28,21 @@ struct SensorData
 {
     float temperature;
     float pressure;
-    float altitude;
     float humidity;
     float luminosity;
     float dewpoint;
 };
 
+unsigned int predictionTypeIndex = 0;
+const unsigned int PREDICTION_TYPES = 4;
+const unsigned int predictionTypes = [ 1, 6, 12, 24 ];
+
 SensorData sensorData = {0, 0, 0, 0, 0, 0};
 
+bool validateData();
 void getSensorData();
 void configureTSL();
+const char *getPredictionType();
 void sendPredictionRequest();
 
 void setup()
@@ -91,18 +96,38 @@ void loop()
         }
         if (buttons & BUTTON_SELECT)
         {
-            lcd.print("Pressure: ");
+            lcd.print("Temperature: \n");
+            lcd.print(sensorData.temperature);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Pressure: \n");
             lcd.print(sensorData.pressure);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Humidity: \n");
+            lcd.print(sensorData.humidity);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Dewpoint: \n");
+            lcd.print(sensorData.dewpoint);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Luminosity: \n");
+            lcd.print(sensorData.luminosity);
+            delay(delayTime);
+            lcd.clear();
         }
         if (buttons & BUTTON_LEFT)
         {
-            lcd.print("Humidity: ");
-            lcd.print(sensorData.humidity);
+            predictionTypeIndex = (predictionTypeIndex + 1) % PREDICTION_TYPES;
+            lcd.print("Prediction Type: \n");
+            lcd.print(predictionTypes[predictionTypeIndex]);
         }
         if (buttons & BUTTON_RIGHT)
         {
-            lcd.print("Luminosity: ");
-            lcd.print(sensorData.luminosity);
+            predictionTypeIndex = (predictionTypeIndex - 1) % PREDICTION_TYPES;
+            lcd.print("Prediction Type: \n");
+            lcd.print(predictionTypes[predictionTypeIndex]);
         }
     }
 }
@@ -113,11 +138,36 @@ void configureTSL()
     tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);
 }
 
+bool validateData()
+{
+    if (sensorData.temperature < -20 || sensorData.temperature > 50)
+    {
+        return false;
+    }
+    if (sensorData.pressure < 800 || sensorData.pressure > 1100)
+    {
+        return false;
+    }
+    if (sensorData.humidity < 0 || sensorData.humidity > 100)
+    {
+        return false;
+    }
+    if (sensorData.luminosity < 0)
+    {
+        return false;
+    }
+    if (sensorData.dewpoint < 0 || sensorData.dewpoint > 50)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void getSensorData()
 {
     sensorData.temperature = bme.readTemperature();
     sensorData.pressure = bme.readPressure() / 100.0F;
-    sensorData.altitude = bme.readAltitude(SEA_LEVEL_RESSURE);
     sensorData.humidity = bme.readHumidity();
 
     float gamma = (B_DEWPOINT * sensorData.temperature / (C_DEWPOINT + sensorData.temperature)) + log(sensorData.humidity / 100.0);
@@ -132,6 +182,34 @@ void getSensorData()
     else
     {
         sensorData.luminosity = -1;
+    }
+
+    if (validateData())
+    {
+        lcd.clear();
+        lcd.print("Data OK");
+    }
+    else
+    {
+        lcd.clear();
+        lcd.print("Data Error");
+    }
+}
+
+const char *getPredictionType()
+{
+    switch (predictionTypeIndex)
+    {
+    case 0:
+        return "ONE_HOUR";
+    case 1:
+        return "SIX_HOURS";
+    case 2:
+        return "TWELVE_HOURS";
+    case 3:
+        return "TWENTY_FOUR_HOURS";
+    default:
+        return "ONE_HOUR";
     }
 }
 
@@ -149,7 +227,7 @@ void sendPredictionRequest()
         jsonDoc["pressure"] = sensorData.pressure;
         jsonDoc["luminosity"] = sensorData.luminosity;
         jsonDoc["dewpoint"] = sensorData.dewpoint;
-        jsonDoc["prediction_type"] = "ONE_HOUR"; // Change as needed
+        jsonDoc["prediction_type"] = getPredictionType();
 
         String requestBody;
         serializeJson(jsonDoc, requestBody);

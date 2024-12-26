@@ -1,20 +1,22 @@
+import os
+
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 import tensorflow as tf
 import numpy as np
 import shutil
-import os
 from random import shuffle
-from tensorflow.keras.models import load_model # type: ignore
+from tensorflow.keras.models import load_model  # type: ignore
 from util.data import prepare_data, read_data
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
 from constants.constants import NORMALIZED_DATA, TEST_SIZE, AI_MODEL_PATH, EPOCHS_NUMBER
+
 
 class RainPrediction:
     def __init__(self, data=None, header=None):
         self.models = {}
         self.data = data
         self.header = header
-        # self.data = shuffle(self.data)
         if self.data and self.header:
             self.train_data, self.test_data = train_test_split(
                 self.data, test_size=TEST_SIZE
@@ -29,13 +31,6 @@ class RainPrediction:
                     "shortwave_radiation",
                 ]
             ]
-        self.class_names = [
-            "No Rain",
-            "Light Rain",
-            "Moderate Rain",
-            "Heavy Rain",
-            "Violent Rain",
-        ]
         self.target_variables = [
             "precipitation_1h",
             "precipitation_6h",
@@ -44,17 +39,44 @@ class RainPrediction:
         ]
 
     def create_model(self, target_variable: str):
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(128, activation='relu', input_shape=(len(self.feature_indices),)),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(len(self.class_names), activation='softmax')
-        ])
+        model = tf.keras.Sequential(
+            [
+                tf.keras.layers.InputLayer(shape=(len(self.feature_indices),)),
+                tf.keras.layers.Dense(
+                    512,
+                    activation="relu",
+                    kernel_regularizer=tf.keras.regularizers.l2(0.001),
+                ),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(
+                    256,
+                    activation="relu",
+                    kernel_regularizer=tf.keras.regularizers.l2(0.001),
+                ),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(
+                    128,
+                    activation="relu",
+                    kernel_regularizer=tf.keras.regularizers.l2(0.001),
+                ),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(
+                    64,
+                    activation="relu",
+                    kernel_regularizer=tf.keras.regularizers.l2(0.001),
+                ),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.5),
+                tf.keras.layers.Dense(1, activation="relu"),
+            ]
+        )
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
+            loss="mean_squared_error",
+            metrics=["mae"],
         )
         self.models[target_variable] = model
         return model
@@ -66,18 +88,25 @@ class RainPrediction:
     def train_model(self, target_variable: str):
         model = self.models[target_variable]
         target_index = self.header.index(target_variable)
-        x_train, y_train = prepare_data(self.train_data, self.feature_indices, target_index)
-        x_test, y_test = prepare_data(self.test_data, self.feature_indices, target_index)
+        x_train, y_train = prepare_data(
+            self.train_data, self.feature_indices, target_index
+        )
+        x_test, y_test = prepare_data(
+            self.test_data, self.feature_indices, target_index
+        )
 
-        # Compute class weights
-        y_train_labels = [row[target_index] for row in self.train_data]
-        class_weights = compute_class_weight('balanced', classes=np.unique(y_train_labels), y=y_train_labels)
-        class_weight_dict = {i: weight for i, weight in enumerate(class_weights)}
-
-        # Train the model with class weights
-        model.fit(x_train, y_train, epochs=EPOCHS_NUMBER, class_weight=class_weight_dict)
-        test_loss, test_accuracy = model.evaluate(x_test, y_test)
-        print(f"Accuracy: {test_accuracy}")
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss", patience=10, restore_best_weights=True
+        )
+        model.fit(
+            x_train,
+            y_train,
+            epochs=EPOCHS_NUMBER,
+            validation_split=0.2,
+            callbacks=[early_stopping],
+        )
+        test_loss, test_mae = model.evaluate(x_test, y_test)
+        print(f"Mean Absolute Error: {test_mae}")
 
     def create_and_train_all_models(self):
         for target_variable in self.target_variables:
@@ -96,24 +125,21 @@ class RainPrediction:
                 self.models[target_variable] = load_model(model_path)
                 self.models[target_variable].compile(
                     optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
-                    loss="sparse_categorical_crossentropy",
-                    metrics=["accuracy"],
+                    loss="mean_squared_error",
+                    metrics=["mae"],
                 )
             except Exception as e:
                 print(f"Error loading model {model_path}: {e}")
 
-    def make_prediction(self, target_variable: str, data) -> str:
+    def make_prediction(self, target_variable: str, data) -> float:
         print("Model prediction")
         if target_variable not in self.models:
             print("Error")
             return "Error"
         data_array = np.array(list(data.values())).reshape(1, -1)
-        print(f"Input data: {data_array}")
         prediction = self.models[target_variable].predict(data_array)
-        print(f"Raw prediction output: {prediction}")
-        predicted_class = np.argmax(prediction)
-        print(f"Predicted class: {predicted_class}")
-        return self.class_names[predicted_class]
+        predicted_value = prediction[0][0]
+        return predicted_value
 
     def remove_models_from_disk(self):
         try:
@@ -128,6 +154,18 @@ class RainPrediction:
         except Exception as e:
             print(f"Error cleaning directory {AI_MODEL_PATH}: {e}")
 
+    def evaluate_model(self, target_variable: str):
+        model = self.models[target_variable]
+        target_index = self.header.index(target_variable)
+        x_test, y_test = prepare_data(
+            self.test_data, self.feature_indices, target_index
+        )
+        test_loss, test_mae = model.evaluate(x_test, y_test)
+        print(f"Evaluation for {target_variable}:")
+        print(f"Mean Absolute Error: {test_mae}")
+        print(f"Loss (MSE): {test_loss}")
+        return test_mae, test_loss
+
 
 def main():
     data, header = read_data(NORMALIZED_DATA)
@@ -135,6 +173,9 @@ def main():
     rain_prediction.remove_models_from_disk()
     rain_prediction.create_and_train_all_models()
     rain_prediction.save_all_models()
+
+    for target_variable in rain_prediction.target_variables:
+        rain_prediction.evaluate_model(target_variable)
 
 
 if __name__ == "__main__":
