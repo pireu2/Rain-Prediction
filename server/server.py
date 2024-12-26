@@ -1,0 +1,24 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+from flask import Flask, request, jsonify
+from ai.predict import predict, SensorData, PredictionType
+
+app = Flask(__name__)
+
+@app.route("/predict", methods=["POST"])
+def predict_rain():
+    data = request.json
+    sensor_data = SensorData(
+        temperature=data['temperature'],
+        humidity=data['humidity'],
+        pressure=data['pressure'],
+        luminosity=data['luminosity'],
+        dewpoint=data['dewpoint']
+    )
+    prediction_type = PredictionType[data['prediction_type']]
+    prediction = predict(sensor_data, prediction_type)
+    return jsonify({'prediction': prediction})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
