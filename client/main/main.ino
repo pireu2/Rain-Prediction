@@ -14,9 +14,9 @@
 #define B_DEWPOINT (17.62)
 #define C_DEWPOINT (243.12)
 
-const char *ssid = "DIGI-8ATN";
-const char *password = "UmzNDS36";
-const char *server = "http://192.168.100.101:5000/predict";
+const char *ssid = "laborator-a75g";
+const char *password = "laborator2022";
+const char *server = "http://192.168.100.133:5000/predict";
 
 Adafruit_BME280 bme;
 Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
@@ -35,9 +35,9 @@ struct SensorData
 
 unsigned int predictionTypeIndex = 0;
 const unsigned int PREDICTION_TYPES = 4;
-const unsigned int predictionTypes = [ 1, 6, 12, 24 ];
+const unsigned int predictionTypes[] = {1, 6, 12, 24};
 
-SensorData sensorData = {0, 0, 0, 0, 0, 0};
+SensorData sensorData = {0, 0, 0, 0, 0};
 
 bool validateData();
 void getSensorData();
