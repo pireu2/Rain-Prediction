@@ -237,12 +237,12 @@ void sendPredictionRequest()
         if (httpResponseCode > 0)
         {
             String response = http.getString();
-            Serial.println(response);
+            lcd.print("Response: \n");
         }
         else
         {
-            Serial.print("Error on sending POST: ");
-            Serial.println(httpResponseCode);
+            lcd.print("Error: \n");
+            lcd.print(httpResponseCode);
         }
 
         http.end();
