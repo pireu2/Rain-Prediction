@@ -1,4 +1,4 @@
-# Rain Prediction Raspberrypi
+# Rain Prediction
 
 ## Motivation
 
