@@ -22,7 +22,7 @@ def predict_rain():
     )
     prediction_type = PredictionType[data["prediction_type"]]
     prediction = predict(sensor_data, prediction_type, rain_prediction)
-    return jsonify({"prediction": prediction})
+    return jsonify({"prediction": float(prediction)})
 
 
 if __name__ == "__main__":

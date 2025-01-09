@@ -14,15 +14,15 @@
 #define B_DEWPOINT (17.62)
 #define C_DEWPOINT (243.12)
 
-const char *ssid = "laborator-a75g";
-const char *password = "laborator2022";
-const char *server = "http://192.168.100.133:5000/predict";
+const char *ssid = "TP-Link_0C10_5G";
+const char *password = "48845946";
+const char *server = "http://192.168.1.213:5000/predict";
 
 Adafruit_BME280 bme;
 Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
 Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield();
 
-unsigned long delayTime;
+unsigned long delayTime = 1000;
 
 struct SensorData
 {
@@ -38,99 +38,6 @@ const unsigned int PREDICTION_TYPES = 4;
 const unsigned int predictionTypes[] = {1, 6, 12, 24};
 
 SensorData sensorData = {0, 0, 0, 0, 0};
-
-bool validateData();
-void getSensorData();
-void configureTSL();
-const char *getPredictionType();
-void sendPredictionRequest();
-
-void setup()
-{
-    Serial.begin(9600);
-
-    lcd.begin(16, 2);
-    lcd.print("LCD OK");
-
-    delayTime = 1000;
-
-    bool status;
-    status = bme.begin(0x76);
-    if (!status)
-    {
-        Serial.println("Could not find BME280 sensor!");
-        while (1)
-            ;
-    }
-    if (!tsl.begin())
-    {
-        Serial.println("Could not find TSL2561 sensor!");
-        while (1)
-            ;
-    }
-    configureTSL();
-
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(1000);
-        Serial.println("Connecting to WiFi..");
-    }
-    Serial.println("Connected to the WiFi network");
-}
-
-void loop()
-{
-
-    uint8_t buttons = lcd.readButtons();
-    if (buttons)
-    {
-        lcd.clear();
-        if (buttons & BUTTON_UP)
-        {
-            getSensorData();
-        }
-        if (buttons & BUTTON_DOWN)
-        {
-            sendPredictionRequest();
-        }
-        if (buttons & BUTTON_SELECT)
-        {
-            lcd.print("Temperature: \n");
-            lcd.print(sensorData.temperature);
-            delay(delayTime);
-            lcd.clear();
-            lcd.print("Pressure: \n");
-            lcd.print(sensorData.pressure);
-            delay(delayTime);
-            lcd.clear();
-            lcd.print("Humidity: \n");
-            lcd.print(sensorData.humidity);
-            delay(delayTime);
-            lcd.clear();
-            lcd.print("Dewpoint: \n");
-            lcd.print(sensorData.dewpoint);
-            delay(delayTime);
-            lcd.clear();
-            lcd.print("Luminosity: \n");
-            lcd.print(sensorData.luminosity);
-            delay(delayTime);
-            lcd.clear();
-        }
-        if (buttons & BUTTON_LEFT)
-        {
-            predictionTypeIndex = (predictionTypeIndex + 1) % PREDICTION_TYPES;
-            lcd.print("Prediction Type: \n");
-            lcd.print(predictionTypes[predictionTypeIndex]);
-        }
-        if (buttons & BUTTON_RIGHT)
-        {
-            predictionTypeIndex = (predictionTypeIndex - 1) % PREDICTION_TYPES;
-            lcd.print("Prediction Type: \n");
-            lcd.print(predictionTypes[predictionTypeIndex]);
-        }
-    }
-}
 
 void configureTSL()
 {
@@ -237,11 +144,14 @@ void sendPredictionRequest()
         if (httpResponseCode > 0)
         {
             String response = http.getString();
-            lcd.print("Response: \n");
+            lcd.print("Response: ");
+            lcd.setCursor(0, 1);
+            lcd.print(response);
         }
         else
         {
-            lcd.print("Error: \n");
+            lcd.print("Error: ");
+            lcd.setCursor(0, 1);
             lcd.print(httpResponseCode);
         }
 
@@ -250,5 +160,119 @@ void sendPredictionRequest()
     else
     {
         Serial.println("WiFi Disconnected");
+    }
+}
+
+void setup()
+{
+    Serial.begin(9600);
+    delay(delayTime);
+
+    lcd.begin(16, 2);
+    lcd.print("LCD test");
+
+    bool status;
+    status = bme.begin(0x76);
+    if (!status)
+    {
+        Serial.println("Could not find BME280 sensor!");
+        while (1)
+            ;
+    }
+    Serial.println("BME280 sensor found!");
+    if (!tsl.begin())
+    {
+        Serial.println("Could not find TSL2561 sensor!");
+        while (1)
+            ;
+    }
+    Serial.println("TSL2561 sensor found!");
+    configureTSL();
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi: ");
+    Serial.println(ssid);
+    unsigned long startAttemptTime = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) // 10 seconds timeout
+    {
+        delay(delayTime);
+        Serial.print(".");
+    }
+    Serial.println();
+
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        Serial.println("Connected to the WiFi network");
+    }
+    else
+    {
+        Serial.println("Failed to connect to WiFi");
+        Serial.print("SSID: ");
+        Serial.println(ssid);
+        Serial.print("Password: ");
+        Serial.println(password);
+    }
+}
+
+void loop()
+{
+
+    uint8_t buttons = lcd.readButtons();
+    if (buttons)
+    {
+        lcd.clear();
+        if (buttons & BUTTON_UP)
+        {
+            getSensorData();
+        }
+        if (buttons & BUTTON_DOWN)
+        {
+            sendPredictionRequest();
+        }
+        if (buttons & BUTTON_SELECT)
+        {
+            lcd.print("Temperature: ");
+            lcd.setCursor(0, 1);
+            lcd.print(sensorData.temperature);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Pressure: ");
+            lcd.setCursor(0, 1);
+            lcd.print(sensorData.pressure);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Humidity: ");
+            lcd.setCursor(0, 1);
+            lcd.print(sensorData.humidity);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Dewpoint: ");
+            lcd.setCursor(0, 1);
+            lcd.print(sensorData.dewpoint);
+            delay(delayTime);
+            lcd.clear();
+            lcd.print("Luminosity: ");
+            lcd.setCursor(0, 1);
+            lcd.print(sensorData.luminosity);
+            delay(delayTime);
+            lcd.clear();
+        }
+        if (buttons & BUTTON_LEFT)
+        {
+            predictionTypeIndex = (predictionTypeIndex - 1) % PREDICTION_TYPES;
+            lcd.print("Prediction Type: ");
+            lcd.setCursor(0, 1);
+            lcd.print(predictionTypes[predictionTypeIndex]);
+            delay(delayTime);
+        }
+        if (buttons & BUTTON_RIGHT)
+        {
+            predictionTypeIndex = (predictionTypeIndex + 1) % PREDICTION_TYPES;
+            lcd.print("Prediction Type: ");
+            lcd.setCursor(0, 1);
+            lcd.print(predictionTypes[predictionTypeIndex]);
+            delay(delayTime);
+        }
     }
 }
